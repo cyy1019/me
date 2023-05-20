@@ -26,6 +26,8 @@ public class ChessboardComponent extends JComponent {
     private static final Set<ChessboardPoint> blueTrapCell = new HashSet<>();
     private static final Set<ChessboardPoint> redDensCell = new HashSet<>();
     private static final Set<ChessboardPoint> blueDensCell = new HashSet<>();
+    public  static  ChessGameFrame mainFrame;
+
 
     private GameController gameController;
     private ArrayList<ChessboardPoint> possibleMovePoint = new ArrayList<>();
@@ -232,7 +234,7 @@ public class ChessboardComponent extends JComponent {
         this.gameController = gameController;
     }
 
-    public void setChessComponentAtGrid(ChessboardPoint point, Component chess) {//在point位置的cell组件里添加棋子
+    public void setChessComponentAtGrid(ChessboardPoint point, Component chess) {//添加棋子
         getGridComponentAt(point).add(chess);
     }
 
@@ -298,11 +300,18 @@ public class ChessboardComponent extends JComponent {
                     gameController.onPlayerClickChessPiece(getChessboardPoint(e.getPoint()), (ChessComponent) clickedComponent.getComponents()[0]);
                     gameController.getGameRound();
                 }
-                System.out.println(gameController.getModel().getChessPieceAt(point).getName());
-                System.out.println(gameController.getModel().getChessPieceAt(point).getRank());
+
             }
+            if (gameController != null && gameController.win()) {
+                PlayerColor loser=gameController.getCurrentPlayer();
+                mainFrame.dispose();
+                winFrame win = new winFrame(1100, 810,loser);
+                System.out.println("win");
+            }
+
         }
     }
+
 
     public static Set<ChessboardPoint> getRiverCell() {
         return riverCell;

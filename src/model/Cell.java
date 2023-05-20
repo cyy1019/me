@@ -2,6 +2,7 @@ package model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * This class describe the slot for Chess in Chessboard
@@ -26,7 +27,6 @@ public class Cell implements Serializable {//一个可以序列化的对象
     public void removePiece(ChessPiece chessPiece){
         
     }
-
 
 }
 /*这个类怎么用，要加代码吗？？？

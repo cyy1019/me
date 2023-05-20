@@ -13,12 +13,14 @@ import java.util.List;
  * The Chessboard has 9*7 cells, and each cell has a position for chess
  */
 public class Chessboard {
-    public  List<Step> stepSet = new ArrayList<>();//TODO：stepset不能static，要改，用了的方法也要改
+    public static List<Step> stepSet = new ArrayList<>();
     public PlayerColor currentSide;
-    public Cell[][] grid;
+    public static Cell[][] grid;
+    //grid是用来放cell的，
+    //要改？？？
+    //创建一个方法initialpiecesfromfile，把数组里的数字变成棋子（？用什么方式存储棋盘）
     public int numberOfBlue = 8;
     public int numberOfRed = 8;
-
 
     public Chessboard() {//constructor
         this.grid =
@@ -76,7 +78,7 @@ public class Chessboard {
         return Math.abs(src.getRow() - dest.getRow()) + Math.abs(src.getCol() - dest.getCol());
     }//计算距离，距离是dy+dx
 
-    private ChessPiece removeChessPiece(ChessboardPoint point) {
+    public ChessPiece removeChessPiece(ChessboardPoint point) {
         ChessPiece chessPiece = getChessPieceAt(point);
         getGridAt(point).removePiece();//remove the piece in the cell
         return chessPiece;
@@ -108,7 +110,7 @@ public class Chessboard {
         }
     }//capture：令进攻棋子原本的槽里的piece为null，被进攻棋子槽里的piece换成进攻动物
 
-    public  Cell[][] getGrid() {
+    public Cell[][] getGrid() {
         return grid;
     }//返回在棋盘格上的槽
 

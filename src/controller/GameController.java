@@ -34,10 +34,9 @@ public class GameController implements GameListener {
     // Record whether there is a selected piece before，即已经被选择的点
     private ChessboardPoint selectedPoint;
     public PlayerColor winner;
-    public  int gameRound;//TODO：gameRound怎么计算要改，红蓝都走一次算一个round
+    private int gameRound;
     private JLabel statusLabel;
-    private ArrayList<Chessboard> eachModel= new ArrayList<>();
-    private ArrayList<ChessboardComponent> eachView=new ArrayList<>();
+    private ArrayList<Step> eachStep = new ArrayList<>();
 
     public JLabel getStatusLabel() {
         return statusLabel;
@@ -57,13 +56,12 @@ public class GameController implements GameListener {
         this.currentPlayer = PlayerColor.BLUE;
         this.gameRound = 1;
         view.registerController(this);
+        //initialize();//在new一个gamecontroller的时候会初始化，初始化啥？？？
         view.initiateChessComponent(model);
         view.repaint();
-        eachView.add(view);
-        eachModel.add(model);
     }
 
-    public void initialize() {
+    public void initialize() {//要自己写吗，初始化什么？棋盘吗？
         model.removeAll();
         model.initPieces();
         view.removeAllComponent();
@@ -72,12 +70,19 @@ public class GameController implements GameListener {
         view.repaint();
     }
 
+    public PlayerColor getCurrentPlayer() {
+        return currentPlayer;
+    }
+
     // after a valid move swap the player一次移动后交换玩家
     private void swapColor() {
         currentPlayer = currentPlayer == PlayerColor.BLUE ? PlayerColor.RED : PlayerColor.BLUE;
+        if (currentPlayer == PlayerColor.BLUE) {
+            gameRound++;
+        }
     }
 
-    private boolean win() {//检查是否有人赢了的方法，看看判定为赢的条件？
+    public boolean win() {//检查是否有人赢了的方法，看看判定为赢的条件？
         ChessboardPoint den1 = new ChessboardPoint(0, 3);
         ChessboardPoint den2 = new ChessboardPoint(8, 3);
         if (model.getChessPieceAt(den1) != null && model.getChessPieceAt(den1).getOwner().equals(PlayerColor.BLUE)) {
@@ -149,19 +154,14 @@ public class GameController implements GameListener {
 
                 }
             }
+            eachStep.add(new Step(model.getChessPieceAt(selectedPoint), selectedPoint, point));
             view.hidePossibleMove();
             view.setPossibleMovePoint(new ArrayList<>());
             model.moveChessPiece(selectedPoint, point);
-            view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));//只在前端内存里改变了棋子的位置
-            Step step = new Step(model.getChessPieceAt(selectedPoint),selectedPoint,point);
-            getModel().stepSet.add(step);
+            view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));//只在内存里改变了棋子的位置
             selectedPoint = null;//重置已选中的点
             swapColor();//交换玩家
-            ChessGameFrame.changeCurrentPlayer();
-            this.gameRound++;
             view.repaint();//一定要重画，不然前端不显示
-            eachModel.add(model);
-            eachView.add(view);
             win();//每次动都检查有没有赢家
         }
     }//TODO:rank只在进对方陷阱时会改变
@@ -171,7 +171,7 @@ public class GameController implements GameListener {
     }
 
     public int getGameRound() {
-        statusLabel.setText(String.format("Round: %d",gameRound));
+        statusLabel.setText(String.format("Round: %d", gameRound));
         return gameRound;
     }
 
@@ -194,36 +194,52 @@ public class GameController implements GameListener {
             view.repaint();//重画，把打的圈去掉
         } else if (model.getChessPieceAt(selectedPoint) != null) {
             if (model.isValidCapture(selectedPoint, point)) {
+                ChessPiece a = model.getChessPieceAt(selectedPoint);
                 view.hidePossibleMove();
                 view.setPossibleMovePoint(new ArrayList<>());
                 view.removeChessComponentAtGrid(point);//
                 model.captureChessPiece(selectedPoint, point);//让cell里的棋子为null后把进攻棋子挪到指定位置上
-                view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));//在前端内存里移动棋子位置
-                Step step = new Step(model.getChessPieceAt(selectedPoint),model.getChessPieceAt(point),selectedPoint,point);
-                getModel().stepSet.add(step);
+                ChessComponent b = view.removeChessComponentAtGrid(selectedPoint);
+                view.setChessComponentAtGrid(point, b);//在前端内存里移动棋子位置
+                Step step = new Step(model.getChessPieceAt(selectedPoint), selectedPoint, point);
+                step.setEatenChesspiece(a);
+                step.setEatenChesspieceComponent(b);
+                eachStep.add(step);
                 selectedPoint = null;//重置已选中的点
                 swapColor();//交换玩家
-                ChessGameFrame.changeCurrentPlayer();
-                this.gameRound++;
                 view.repaint();//一定要重画，不然前端不显示
-                eachModel.add(model);
-                eachView.add(view);
                 win();//每次动都检查有没有赢家
             }
         }
-    }
+    }//TODO:可能要在cell里再删一次???已经被吃掉了但是没画出来，哪里没删掉吗？？？
 
-    public void undo(){
-        eachModel.remove(eachModel.size()-1);
-        eachView.remove(eachView.size()-1);
-        model=eachModel.get(eachModel.size()-1);
-        view=eachView.get(eachView.size()-1);
-        swapColor();
+
+    public void undo() {
+        model.moveChessPiece(eachStep.get(eachStep.size() - 1).getChessboardPointEnd(), eachStep.get(eachStep.size() - 1).getChessboardPointStart());
+        view.setChessComponentAtGrid(eachStep.get(eachStep.size() - 1).getChessboardPointStart(), view.removeChessComponentAtGrid(eachStep.get(eachStep.size() - 1).getChessboardPointEnd()));
+        if (eachStep.get(eachStep.size() - 1).getEatenChesspiece() != null) {
+            model.setChessPiece(eachStep.get(eachStep.size() - 1).getChessboardPointEnd(), eachStep.get(eachStep.size() - 1).getEatenChesspiece());
+            view.setChessComponentAtGrid(eachStep.get(eachStep.size() - 1).getChessboardPointEnd(), eachStep.get(eachStep.size() - 1).getEatenChesspieceComponent());
+        }
         view.repaint();
+        eachStep.remove(eachStep.get(eachStep.size() - 1));
+        swapColor();
         gameRound--;
+        getGameRound();
     }
 
 
-
-
+    public void loadGameFromFile(String path) {//从文件中读入游戏棋盘，输入的时存放文件的路径，在ide里？？？
+        try {
+            List<String> lines = Files.readAllLines(Path.of(path));
+            for (String line : lines
+            ) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }//存储棋盘状态用的，棋盘上的棋子对象/cell对象用序列化恢复吗？？？
+    //看看SA的tips
+//好像存在这里不太好，看看SA的tips
 }
