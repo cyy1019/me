@@ -153,7 +153,7 @@ public class Chessboard {
                 if (getChessPieceAt(p2) != null || getChessPieceAt(p3) != null) {
                     return false;
                 }
-                return calculateDistance(src, dest) == 3;
+                return calculateDistance(src, dest) == 3 && (src.getCol() == dest.getCol() | src.getRow() == dest.getRow());
             } else {
                 return calculateDistance(src, dest) == 1;
             }
@@ -196,7 +196,7 @@ public class Chessboard {
     }
 
     public static PlayerColor getCurrentSide() {
-        if (ChessGameFrame.getGameController().getModel().stepSet.size() %2 == 1) {
+        if (ChessGameFrame.getGameController().getEachStep().size() %2 == 1) {
             return PlayerColor.RED;
         }
         return PlayerColor.BLUE;

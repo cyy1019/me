@@ -1,11 +1,17 @@
 package view;
 
 import controller.GameController;
+import controller.Loading;
+import model.Cell;
+import model.ChessPiece;
 import model.Chessboard;
+import model.ChessboardPoint;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
+import static view.ChessGameFrame.*;
 import static view.ChessboardComponent.mainFrame;
 
 public class Menu extends JFrame {
@@ -38,7 +44,7 @@ public class Menu extends JFrame {
             SwingUtilities.invokeLater(() -> {
                 this.dispose();
                 mainFrame= new ChessGameFrame(1100, 810);
-                GameController gameController = new GameController(mainFrame.getChessboardComponent(), new Chessboard());
+                GameController gameController = new GameController(getChessboardComponent(), new Chessboard());
                 mainFrame.setGameController(gameController);
                 gameController.setStatusLabel(mainFrame.getStatusLabel());
             });
@@ -51,8 +57,104 @@ public class Menu extends JFrame {
     private void loadButton() {
         JButton button = new JButton("Load");
         button.addActionListener((e) -> {
-            this.dispose();
+            SwingUtilities.invokeLater(() -> {
+                this.dispose();
+                mainFrame= new ChessGameFrame(1100, 810);
+                GameController gameController = new GameController(getChessboardComponent(), new Chessboard());
+                mainFrame.setGameController(gameController);
+                gameController.setStatusLabel(mainFrame.getStatusLabel());
+                getChessboardComponent().removeAllComponent();//前端把所有棋子组件移除了
+                getGameController().getModel().removeAll();//在后端chessboard上把所有棋子移走了
+                try {//重新传入grid
+                    getGameController().getModel().setStepSet(Loading.deserializeStep("C:\\Users\\陈彦妤\\Desktop\\pro\\Step.txt"));
+                    getGameController().getModel().setGrid(Loading.deserializeCell("C:\\Users\\陈彦妤\\Desktop\\pro\\Cell.txt"));
+                    for (int i = 0; i < 9; i++) {
+                        for (int j = 0; j < 7; j++) {
+                            ChessboardPoint point = new ChessboardPoint(i, j);
+                            if (getGameController().getModel().getChessPieceAt(point) != null) {
+                                Cell[][] grid = getGameController().getModel().getGrid();//不一定每一个cell里都有棋子
+                                //TODO:把棋子组件加回去
+                                if (grid[i][j].getPiece().getName().equals("Leopard")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    ChessGameFrame.getChessboardComponent().getGridComponents()[i][j].add(
+                                            new LeopardChessComponent(
+                                                    chessPiece.getOwner(),getChessboardComponent().getCHESS_SIZE()
+                                            ));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Elephant")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new ElephantChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Tiger")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new TigerChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Lion")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new LionChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Wolf")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new WolfChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Dog")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new DogChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Cat")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new CatChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                if (grid[i][j].getPiece().getName().equals("Rat")) {
+                                    ChessPiece chessPiece = grid[i][j].getPiece();
+                                    System.out.println(chessPiece.getOwner());
+                                    getChessboardComponent().getGridComponents()[i][j].add(
+                                            new RatChessComponent(
+                                                    chessPiece.getOwner(),
+                                                    getChessboardComponent().getCHESS_SIZE()));
+                                }
+                                getChessboardComponent().repaint();
+                                changeCurrentPlayer();
+                                //TODO:重新setgameround
+                            }
+                        }
+                    }
+                    for (int i = 0; i < 9; i++) {
+                        for (int j = 0; j < 7; j++) {
 
+                        } System.out.println();
+
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
         });
         button.setLocation(450, HEIGTH / 10+350);
         button.setSize(200, 60);

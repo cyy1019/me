@@ -2,10 +2,7 @@ package controller;
 
 
 import listener.GameListener;
-import model.Chessboard;
-import model.ChessboardPoint;
-import model.PlayerColor;
-import model.Step;
+import model.*;
 import view.CellComponent;
 import view.ChessComponent;
 import view.ChessGameFrame;
@@ -161,6 +158,7 @@ public class GameController implements GameListener {
             view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));//只在内存里改变了棋子的位置
             selectedPoint = null;//重置已选中的点
             swapColor();//交换玩家
+            ChessGameFrame.changeCurrentPlayer();
             view.repaint();//一定要重画，不然前端不显示
             win();//每次动都检查有没有赢家
         }
@@ -207,6 +205,7 @@ public class GameController implements GameListener {
                 eachStep.add(step);
                 selectedPoint = null;//重置已选中的点
                 swapColor();//交换玩家
+                ChessGameFrame.changeCurrentPlayer();
                 view.repaint();//一定要重画，不然前端不显示
                 win();//每次动都检查有没有赢家
             }
@@ -224,22 +223,12 @@ public class GameController implements GameListener {
         view.repaint();
         eachStep.remove(eachStep.get(eachStep.size() - 1));
         swapColor();
+        ChessGameFrame.changeCurrentPlayer();
         gameRound--;
         getGameRound();
     }
 
-
-    public void loadGameFromFile(String path) {//从文件中读入游戏棋盘，输入的时存放文件的路径，在ide里？？？
-        try {
-            List<String> lines = Files.readAllLines(Path.of(path));
-            for (String line : lines
-            ) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }//存储棋盘状态用的，棋盘上的棋子对象/cell对象用序列化恢复吗？？？
-    //看看SA的tips
-//好像存在这里不太好，看看SA的tips
+    public ArrayList<Step> getEachStep() {
+        return eachStep;
+    }
 }

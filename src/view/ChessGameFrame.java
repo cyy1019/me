@@ -2,7 +2,7 @@ package view;
 
 import controller.GameController;
 import controller.Loading;
-import model.Chessboard;
+import model.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +21,7 @@ public class ChessGameFrame extends JFrame {
 
     private final int ONE_CHESS_SIZE;
 
-    private ChessboardComponent chessboardComponent;
+    private static ChessboardComponent chessboardComponent;
     private static GameController gameController;
     private JLabel statusLabel;
 
@@ -62,7 +62,7 @@ public class ChessGameFrame extends JFrame {
         Music player = new Music();
     }
 
-    public ChessboardComponent getChessboardComponent() {
+    public static ChessboardComponent getChessboardComponent() {
         return chessboardComponent;
     }
 
@@ -227,17 +227,14 @@ public class ChessGameFrame extends JFrame {
             } catch (ClassNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
-<<<<<<< HEAD
+
         });
         //TODO:注意gameRound有问题，棋子刚开始变小了，但可以正常点击，有时候currentplayer有问题
-=======
             //TODO：序列化的实际是cell，里面包括了棋子，从开始界面重新加载棋盘进来
             //TODO：把cell的二维数组读入，初始化棋子以外的组件（cell，traps，dens），然后按照读入的cell数组的信息画出棋子的组件
             //TODO：加载实需要重新画棋盘，但不需要初始化棋子，
 
-        });
->>>>>>> 22ad818 (nn)
-    }
+}
 
     //保存
     private void savejButton() {
