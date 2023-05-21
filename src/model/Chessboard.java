@@ -183,6 +183,39 @@ public class Chessboard {
                 return false;//cannot be captured
             }
             return calculateDistance(src, dest) == 1;
+        }else{
+            int rank1 = 0;
+            if(ChessboardComponent.getBlueTrapCell().contains(src) || ChessboardComponent.getRedTrapCell().contains(src)){
+                switch (getChessPieceAt(src).getName()) {
+                    case "Elephant":
+                        rank1 = 8;
+                        break;
+                    case "Wolf":
+                        rank1 = 4;
+                        break;
+                    case "Leopard":
+                       rank1 = 5;
+                        break;
+                    case "Rat":
+                       rank1 = 1;
+                        break;
+                    case "Cat":
+                        rank1 = 2;
+                        break;
+                    case "Dog":
+                        rank1 = 3;
+                        break;
+                    case "Lion":
+                       rank1 = 7;
+                        break;
+                    case "Tiger":
+                        rank1 = 6;
+                        break;
+
+                }
+            }if(rank1 >= getChessPieceAt(dest).getRank()){
+                return calculateDistance(src,dest) == 1;
+            }
         }
         return false;//判断是否等于1，等于1则可以capture
     }
