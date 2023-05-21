@@ -31,7 +31,7 @@ public class GameController implements GameListener {
     // Record whether there is a selected piece before，即已经被选择的点
     private ChessboardPoint selectedPoint;
     public PlayerColor winner;
-    private int gameRound;
+    private int gameRound = 1;
     private JLabel statusLabel;
     private ArrayList<Step> eachStep = new ArrayList<>();
 
@@ -230,5 +230,9 @@ public class GameController implements GameListener {
 
     public ArrayList<Step> getEachStep() {
         return eachStep;
+    }
+
+    public void setEachStep(ArrayList<Step> eachStep) {
+        this.eachStep = eachStep;
     }
 }

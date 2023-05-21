@@ -7,6 +7,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static model.Chessboard.stepSet;
+
 
 /*TODO:the file saving the game should include the current chessboard, the previous move, the current side to play*/
 /*TODO：读入进来之后前端要重新画棋盘
@@ -25,37 +27,25 @@ public class Loading {//要序列化什么，整个cell的二维数组grid和pre
         ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(filename));
         Cell[][] grid = (Cell[][]) objectinputstream.readObject();//读入进来直接就是一个cell的二维数组，不用再initgrid
         objectinputstream.close();
-        for (Cell[] c : grid
-        ) {
-            for (Cell c1 : c
-            ) {
-                System.out.print(c1);
-            }
-            System.out.println();
-        }
         System.out.println();
         return grid;
     }//从文件中读入grid后将棋盘返回
 
-    public static void serializeStep(List<Step> stepSet, String filename) throws IOException {
+    public static void serializeStep(ArrayList<Step> eachStep, String filename) throws IOException {
         ObjectOutputStream objectOutputStream =
                 new ObjectOutputStream(new FileOutputStream(filename));
-        objectOutputStream.writeObject(stepSet);
+        objectOutputStream.writeObject(eachStep);
         objectOutputStream.close();
 
     }
 
-    public static List<Step> deserializeStep(String filename) throws IOException, ClassNotFoundException {
+    public static ArrayList<Step> deserializeStep(String filename) throws IOException, ClassNotFoundException {
         ObjectInputStream objectInputStream =
                 new ObjectInputStream(new FileInputStream(filename));
-        List<Step> stepSet = (ArrayList<Step>) objectInputStream.readObject();
+        ArrayList<Step> eachStep = (ArrayList<Step>) objectInputStream.readObject();
         objectInputStream.close();
-        for (Step s : stepSet
-        ) {
-            System.out.println(s);
-        }
-        System.out.println(stepSet.size());
-        return stepSet;
+        System.out.println(eachStep.size());
+        return eachStep;
     }
 
 

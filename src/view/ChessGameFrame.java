@@ -2,6 +2,7 @@ package view;
 
 import controller.GameController;
 import controller.Loading;
+import controller.MyThread;
 import model.*;
 
 import javax.swing.*;
@@ -9,6 +10,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.io.File;
+import javax.imageio.ImageIO;
+
 
 /**
  * 这个类表示游戏过程中的整个游戏界面，是一切的载体
@@ -23,7 +27,7 @@ public class ChessGameFrame extends JFrame {
 
     private static ChessboardComponent chessboardComponent;
     private static GameController gameController;
-    private JLabel statusLabel;
+    private static JLabel statusLabel;
 
     private static JLabel presentPlayer = new JLabel();
 
@@ -39,27 +43,32 @@ public class ChessGameFrame extends JFrame {
         this.gameController = gameController;
     }
 
+    private File bgm;
+    private Music music = new Music();
+
+
     public ChessGameFrame(int width, int height) {
         setTitle("斗兽棋"); //设置标题
         this.WIDTH = width;
         this.HEIGTH = height;
         this.ONE_CHESS_SIZE = (HEIGTH * 4 / 5) / 9;
-
         setSize(WIDTH, HEIGTH);
         setLocationRelativeTo(null); // Center the window.
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //设置程序关闭按键，如果点击右上方的叉就游戏全部关闭了
         setLayout(null);
         setVisible(true);
-
-
         addChessboard();
         addLabel();
         addRestartButton();
-        addLoadButton();
         savejButton();
         addUndoButton();
         addPresentPlayer();
-        Music player = new Music();
+        addExitButton();
+        MyThread myThread = new MyThread();
+        myThread.start();
+        bgm = new File("resource/久石让 - 菊次郎的夏天 (1).wav");
+        music.playMusic(bgm);
+
     }
 
     public static ChessboardComponent getChessboardComponent() {
@@ -139,20 +148,20 @@ public class ChessGameFrame extends JFrame {
 //通过点击当前button可触发的事件都写到括号内
         button.addActionListener(e -> {// 直接在按钮这里写监听器
             try {//重新传入grid
-                getGameController().getModel().setStepSet(Loading.deserializeStep("C:\\Users\\陈彦妤\\Desktop\\pro\\Step.txt"));
-                getGameController().getModel().setGrid(Loading.deserializeCell("C:\\Users\\陈彦妤\\Desktop\\pro\\Cell.txt"));
+                getGameController().setEachStep(Loading.deserializeStep("resource/Step.txt"));
+                getGameController().getModel().setGrid(Loading.deserializeCell("resource/Cell.txt"));
                 for (int i = 0; i < 9; i++) {
                     for (int j = 0; j < 7; j++) {
                         ChessboardPoint point = new ChessboardPoint(i, j);
-                       if (getGameController().getModel().getChessPieceAt(point) != null) {
+                        if (getGameController().getModel().getChessPieceAt(point) != null) {
                             Cell[][] grid = getGameController().getModel().getGrid();//不一定每一个cell里都有棋子
                             //TODO:把棋子组件加回去
                             if (grid[i][j].getPiece().getName().equals("Leopard")) {
                                 ChessPiece chessPiece = grid[i][j].getPiece();
                                 getChessboardComponent().getGridComponents()[i][j].add(
                                         new LeopardChessComponent(
-                                                chessPiece.getOwner(),ONE_CHESS_SIZE
-                                                ));
+                                                chessPiece.getOwner(), ONE_CHESS_SIZE
+                                        ));
                             }
                             if (grid[i][j].getPiece().getName().equals("Elephant")) {
                                 ChessPiece chessPiece = grid[i][j].getPiece();
@@ -210,18 +219,25 @@ public class ChessGameFrame extends JFrame {
                                                 chessPiece.getOwner(),
                                                 getChessboardComponent().getCHESS_SIZE()));
                             }
-                               getChessboardComponent().repaint();
+                            System.out.println(gameController.getEachStep().size());
+                            String text;
+                            if (gameController.getGameRound() % 2 == 0) {
+                                gameController.setGameRound(gameController.getEachStep().size() / 2 + 1);
+                                System.out.println(gameController.getGameRound());
+                                text = "Round: " + gameController.getGameRound();
+                            } else {
+                                gameController.setGameRound(gameController.getEachStep().size() / 2);
+                                System.out.println(gameController.getGameRound());
+                                text = "Round: " + gameController.getGameRound();
+                            }
+                            statusLabel.setText(text);
+                            getChessboardComponent().repaint();
                             changeCurrentPlayer();
                             //TODO:重新setgameround
                         }
                     }
                 }
-                for (int i = 0; i < 9; i++) {
-                    for (int j = 0; j < 7; j++) {
 
-                    } System.out.println();
-
-                }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             } catch (ClassNotFoundException ex) {
@@ -230,30 +246,31 @@ public class ChessGameFrame extends JFrame {
 
         });
         //TODO:注意gameRound有问题，棋子刚开始变小了，但可以正常点击，有时候currentplayer有问题
-            //TODO：序列化的实际是cell，里面包括了棋子，从开始界面重新加载棋盘进来
-            //TODO：把cell的二维数组读入，初始化棋子以外的组件（cell，traps，dens），然后按照读入的cell数组的信息画出棋子的组件
-            //TODO：加载实需要重新画棋盘，但不需要初始化棋子，
+        //TODO：序列化的实际是cell，里面包括了棋子，从开始界面重新加载棋盘进来
+        //TODO：把cell的二维数组读入，初始化棋子以外的组件（cell，traps，dens），然后按照读入的cell数组的信息画出棋子的组件
+        //TODO：加载实需要重新画棋盘，但不需要初始化棋子，
 
-}
+    }
 
     //保存
     private void savejButton() {
         JButton savejButton = new JButton("Save");
-        savejButton.setLocation(HEIGTH, HEIGTH / 10 + 480);
+        savejButton.setLocation(HEIGTH, HEIGTH / 10 + 360);
         savejButton.setSize(200, 60);
         savejButton.setFont(new Font("Rockwell", Font.BOLD, 20));
         add(savejButton);
         savejButton.addActionListener(e -> {
             try {
-                Loading.serializeCell(getGameController().getModel().getGrid(), "C:\\Users\\陈彦妤\\Desktop\\pro\\Cell.txt");
-                Loading.serializeStep(getGameController().getModel().getStepSet(), "C:\\Users\\陈彦妤\\Desktop\\pro\\Step.txt");
+                Loading.serializeCell(getGameController().getModel().getGrid(), "resource/Cell.txt");
+                Loading.serializeStep(getGameController().getEachStep(), "resource/Step.txt");
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             getChessboardComponent().removeAllComponent();//前端把所有棋子组件移除了
             getGameController().getModel().removeAll();//在后端chessboard上把所有棋子移走了
-            gameController.setGameRound(1);//TODO:改不掉！！！
+            statusLabel.setText("Round: 1");
             repaint();
+            System.out.println(gameController.getGameRound());
         });
     }
 
@@ -274,4 +291,20 @@ public class ChessGameFrame extends JFrame {
             presentPlayer.setText("Player: RED");
     }
 
+    private void addExitButton() {
+        JButton button = new JButton("Exit");
+        button.addActionListener((e) -> {
+            SwingUtilities.invokeLater(() -> {
+                this.dispose();
+                SwingUtilities.invokeLater(() -> {
+                    Menu mainMenu=new Menu(1100,810);
+                });
+
+            });
+        });
+        button.setLocation(HEIGTH,HEIGTH/10+480);
+        button.setSize(200, 60);
+        button.setFont(new Font("Rockwell", Font.BOLD, 20));
+        add(button);
+    }
 }

@@ -66,8 +66,9 @@ public class Menu extends JFrame {
                 getChessboardComponent().removeAllComponent();//前端把所有棋子组件移除了
                 getGameController().getModel().removeAll();//在后端chessboard上把所有棋子移走了
                 try {//重新传入grid
-                    getGameController().getModel().setStepSet(Loading.deserializeStep("C:\\Users\\陈彦妤\\Desktop\\pro\\Step.txt"));
-                    getGameController().getModel().setGrid(Loading.deserializeCell("C:\\Users\\陈彦妤\\Desktop\\pro\\Cell.txt"));
+                    getGameController().setEachStep(Loading.deserializeStep("resource/Step.txt"));
+                    getGameController().getModel().setGrid(Loading.deserializeCell("resource/Cell.txt"));
+                    System.out.println(gameController.getEachStep().size());
                     for (int i = 0; i < 9; i++) {
                         for (int j = 0; j < 7; j++) {
                             ChessboardPoint point = new ChessboardPoint(i, j);
@@ -137,17 +138,21 @@ public class Menu extends JFrame {
                                                     chessPiece.getOwner(),
                                                     getChessboardComponent().getCHESS_SIZE()));
                                 }
+                                System.out.println(gameController.getEachStep().size());
+                                String text;
+                                if (getGameController().getEachStep().size() % 2 == 0) {
+                                    gameController.setGameRound(gameController.getEachStep().size() / 2 + 1);
+                                    text = "Round: " + gameController.getGameRound();
+                                } else {
+                                    gameController.setGameRound(gameController.getEachStep().size() / 2);
+                                    text = "Round: " + gameController.getGameRound();
+                                }
+                                getGameController().getStatusLabel().setText(text);
                                 getChessboardComponent().repaint();
                                 changeCurrentPlayer();
                                 //TODO:重新setgameround
                             }
                         }
-                    }
-                    for (int i = 0; i < 9; i++) {
-                        for (int j = 0; j < 7; j++) {
-
-                        } System.out.println();
-
                     }
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
